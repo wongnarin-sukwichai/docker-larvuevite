@@ -35,7 +35,7 @@ docker-compose run composer install
 docker-compose run npm install
 `  
 docker-compose run npm run build
-`
+
 # Setup Laravel
 Generate Key  
 `
