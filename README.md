@@ -2,7 +2,7 @@
 Docker-compose สำหรับ build Laravel10 Vuejs3 Vite แบบ Multiple Site
 
 # Laravel-Docker
-Laravel in Dcoker Compose
+Laravel in Docker Compose
 
 # Setup
 
@@ -26,7 +26,6 @@ vim src/.env
 `
 docker-compose up -d
 `
-
 
 # Dependencies Install
 `
