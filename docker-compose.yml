@@ -1,0 +1,107 @@
+version: "3.8"                                    #ระบุว่าเราจะใช้ Compose file เวอร์ชั่นไหน
+
+networks:
+  laravel:
+    driver: bridge
+
+services:                                         #ระบุ container ที่จะต้องใช้
+  nginx:
+    build:                                        #เป็นการบอกว่าให้ใช้ image ที่สร้างจาก Dockerfile
+      context: .
+      dockerfile: ./.docker/nginx/Dockerfile      #อ้าง path DockerFile
+    container_name: nginx
+    restart: always                               #กำหนดให้ service นั้น restart ตัวเองอัตโนมัติเมื่อเกิดข้อผิดพลาด หรือสั่งให้เริ่มต้นทำงานอัตโนมัติเมื่อเปิดเครื่องขึ้นมาใหม่
+    ports:                                        #ทำ port mapping ระหว่าง host(ข้างนอก):container(ข้างใน)
+      - "8080:80"                                 #เพิ่ม port เพื่อกำหนด site หลายๆ site
+      - "8081:81"                                   
+    volumes:
+      - ./src:/var/www/html:delegated             #สร้าง path/folder
+      - ./logs:/var/log/nginx
+      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:                                   #ให้ service นั้นเริ่มทำงานหลังจาก service ที่ depens_on อยู่เริ่มต้นทำงานเสร็จแล้ว
+      - php
+    networks:                                     #ใช้เพื่อสร้างเส้นทางสื่อสารกันระหว่าง container
+      - laravel
+
+  php:
+    build:
+      context: .
+      dockerfile: ./.docker/php/Dockerfile
+    container_name: php
+    restart: always
+    volumes:
+      - ./src:/var/www/html:delegated
+    networks:
+      - laravel
+
+  mysql:
+    image: mariadb:10.4.28                          #หลัง : เป็นการกำหนด version 
+    container_name: mysql
+    restart: always
+    tty: true
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 2000000000000
+    depends_on:
+      - mysql
+    ports:
+      - "81:80"
+    networks:
+      - laravel
+
+  composer:
+    build:
+      context: .
+      dockerfile: ./.docker/php/composer/Dockerfile
+    container_name: composer
+    volumes:
+      - ./src/laravel:/var/www/html                                 #เปลี่ยน path ตามชื่อ site ถึงจะใช้งาน composer npm artisan ได้
+    working_dir: /var/www/html                                    # ^ กล่าวคือ ต้อง build ให้เสร็จเป็น site ค่อยมาเปลี่ยนแล้ว docker-compose up -d 
+    depends_on:                                                   # ^ ใหม่เป็นการ update อีกที (แนะนำให้ backup db ก่อน กันไว้ ใครจะไปรู้ 55+)
+      - php
+    user: laravel
+    networks:
+      - laravel
+    entrypoint: [ "composer", "--ignore-platform-reqs" ]
+
+  npm:
+    image: node:18.16.0
+    container_name: npm
+    volumes:
+      - ./src/laravel:/var/www/html
+    working_dir: /var/www/html
+    entrypoint: [ "npm" ]
+
+  artisan:
+    build:
+      context: .
+      dockerfile: ./.docker/php/Dockerfile
+    container_name: artisan
+    volumes:
+      - ./src/laravel:/var/www/html:delegated
+    working_dir: /var/www/html
+    user: laravel
+    entrypoint: [ "php", "/var/www/html/artisan" ]
+    networks:
+      - laravel
+
+  # redis:
+  #   image: "redis:alpine"
+  #   container_name: redis
+  #   restart: always
+  #   networks:
+  #     - laravel
