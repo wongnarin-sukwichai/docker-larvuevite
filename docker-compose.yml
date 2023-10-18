@@ -16,7 +16,8 @@ services:                                         #ระบุ container ที
       - "8081:81"                                   
     volumes:
       - ./src:/var/www/html:delegated             #สร้าง path/folder
-      - ./logs:/var/log/nginx                     #การ mount folder ใน container ออกมาไว้ข้างนอก (ต้อง up จะเห็น folder เอง)
+      # - ./logs:/var/log/nginx                   #การ mount folder ใน container ออกมาไว้ข้างนอก (ต้อง up จะเห็น folder เอง)
+      - nginx-volume:/var/log/nginx               
       - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:                                   #ให้ service นั้นเริ่มทำงานหลังจาก service ที่ depens_on อยู่เริ่มต้นทำงานเสร็จแล้ว
       - php
@@ -45,7 +46,10 @@ services:                                         #ระบุ container ที
       MYSQL_PASSWORD: ${DB_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - ./mysql:/var/lib/mysql
+      # - ./mysql:/var/lib/mysql
+      - mysql-volume:/var/lib/mysql
+    ports:
+      - "3306:3306"
     networks:
       - laravel
 
@@ -69,7 +73,7 @@ services:                                         #ระบุ container ที
       dockerfile: ./.docker/php/composer/Dockerfile
     container_name: composer
     volumes:
-      - ./src/laravel:/var/www/html                                 #เปลี่ยน path ตามชื่อ site ถึงจะใช้งาน composer npm artisan ได้
+      - ./src/worktime:/var/www/html                              #เปลี่ยน path ตามชื่อ site ถึงจะใช้งาน composer npm artisan ได้
     working_dir: /var/www/html                                    # ^ กล่าวคือ ต้อง build ให้เสร็จเป็น site ค่อยมาเปลี่ยนแล้ว docker-compose up -d 
     depends_on:                                                   # ^ ใหม่เป็นการ update อีกที (แนะนำให้ backup db ก่อน กันไว้ ใครจะไปรู้ 55+)
       - php
@@ -82,7 +86,7 @@ services:                                         #ระบุ container ที
     image: node:18.16.0
     container_name: npm
     volumes:
-      - ./src/laravel:/var/www/html
+      - ./src/worktime:/var/www/html
     working_dir: /var/www/html
     entrypoint: [ "npm" ]
 
@@ -92,7 +96,7 @@ services:                                         #ระบุ container ที
       dockerfile: ./.docker/php/Dockerfile
     container_name: artisan
     volumes:
-      - ./src/laravel:/var/www/html:delegated
+      - ./src/worktime:/var/www/html:delegated
     working_dir: /var/www/html
     user: laravel
     entrypoint: [ "php", "/var/www/html/artisan" ]
@@ -105,3 +109,8 @@ services:                                         #ระบุ container ที
   #   restart: always
   #   networks:
   #     - laravel
+
+# สร้าง Volume เพื่อ ฺBackup & Restore ข้อมูล
+volumes:
+  nginx-volume:
+  mysql-volume:
