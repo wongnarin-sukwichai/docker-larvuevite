@@ -16,7 +16,7 @@ services:                                         #ระบุ container ที
       - "8081:81"                                   
     volumes:
       - ./src:/var/www/html:delegated             #สร้าง path/folder
-      - ./logs:/var/log/nginx
+      - ./logs:/var/log/nginx                     #การ mount folder ใน container ออกมาไว้ข้างนอก (ต้อง up 0tgsHo folder เอง)
       - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:                                   #ให้ service นั้นเริ่มทำงานหลังจาก service ที่ depens_on อยู่เริ่มต้นทำงานเสร็จแล้ว
       - php
