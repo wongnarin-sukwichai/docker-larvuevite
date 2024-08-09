@@ -13,7 +13,7 @@ services:                                         #ระบุ container ที
     restart: always                               #กำหนดให้ service นั้น restart ตัวเองอัตโนมัติเมื่อเกิดข้อผิดพลาด หรือสั่งให้เริ่มต้นทำงานอัตโนมัติเมื่อเปิดเครื่องขึ้นมาใหม่
     ports:                                        #ทำ port mapping ระหว่าง host(ข้างนอก):container(ข้างใน)
       - "80:80"                                   #เพิ่ม port เพื่อกำหนด site หลายๆ site
-      - "443:443"                                                                    
+      - "443:4435"                                                                    
     volumes:
       - ./src:/var/www/html:delegated             #สร้าง path/folder
       - ./logs:/var/log/nginx                   #การ mount folder ใน container ออกมาไว้ข้างนอก (ต้อง up จะเห็น folder เอง)           
