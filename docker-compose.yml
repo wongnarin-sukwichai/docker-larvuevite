@@ -72,7 +72,7 @@ services:                                         #ระบุ container ที
       dockerfile: ./.docker/php/composer/Dockerfile
     container_name: composer
     volumes:
-      - ./src/worktime:/var/www/html                              #เปลี่ยน path ตามชื่อ site ถึงจะใช้งาน composer npm artisan ได้
+      - ./src/liboffice:/var/www/html                              #เปลี่ยน path ตามชื่อ site ถึงจะใช้งาน composer npm artisan ได้
     working_dir: /var/www/html                                    # ^ กล่าวคือ ต้อง build ให้เสร็จเป็น site ค่อยมาเปลี่ยนแล้ว docker-compose up -d 
     depends_on:                                                   # ^ ใหม่เป็นการ update อีกที (แนะนำให้ backup db ก่อน กันไว้ ใครจะไปรู้ 55+)
       - php
@@ -85,7 +85,7 @@ services:                                         #ระบุ container ที
     image: node:18.16.0
     container_name: npm
     volumes:
-      - ./src/worktime:/var/www/html     
+      - ./src/liboffice:/var/www/html     
     working_dir: /var/www/html
     entrypoint: [ "npm" ]
 
@@ -95,7 +95,7 @@ services:                                         #ระบุ container ที
       dockerfile: ./.docker/php/Dockerfile
     container_name: artisan
     volumes:
-      - ./src/worktime:/var/www/html:delegated
+      - ./src/liboffice:/var/www/html:delegated
     working_dir: /var/www/html
     user: laravel
     entrypoint: [ "php", "/var/www/html/artisan" ]
