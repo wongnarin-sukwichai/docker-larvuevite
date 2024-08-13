@@ -1,5 +1,4 @@
 FROM php:8.2.4-fpm-alpine
-RUN apk add --update docker
 
 # Copy File Config
 COPY ./.docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
